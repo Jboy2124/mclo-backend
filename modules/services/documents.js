@@ -88,7 +88,7 @@ module.exports = {
   },
   getProcessingDocuments: async ({ page }) => {
     const pageNumber = page || 1;
-    const pageSize = 5;
+    const pageSize = 15;
     const pageOffset = (pageNumber - 1) * pageSize;
 
     const [{ count }] = await knex("tbl_processing_details as proc")
@@ -166,16 +166,26 @@ module.exports = {
   },
   searchProcessingDocuments: async ({ code, description, page }) => {
     const pageNumber = page || 1;
-    const pageSize = 5;
+    const pageSize = 15;
     const pageOffset = (pageNumber - 1) * pageSize;
 
     const codeInput = `%${code}%`;
     const descriptionInput = `%${description}%`;
 
+    // const [{ count }] = await knex("tbl_document_details as doc")
+    //   .leftJoin("tbl_processing_details as proc", "doc.doc_id", "proc.doc_id")
+    //   .whereILike("doc.code_id", codeInput)
+    //   .orWhereILike("doc.document_description", descriptionInput)
+    //   .where("proc.process_status", "Unassigned")
+    //   .count({ count: "*" });
     const [{ count }] = await knex("tbl_document_details as doc")
       .leftJoin("tbl_processing_details as proc", "doc.doc_id", "proc.doc_id")
-      .whereILike("doc.code_id", codeInput)
-      .orWhereILike("doc.document_description", descriptionInput)
+      .where((qb) => {
+        qb.whereILike("doc.code_id", codeInput).orWhereILike(
+          "doc.document_description",
+          descriptionInput
+        );
+      })
       .andWhere("proc.process_status", "Unassigned")
       .count({ count: "*" });
 
@@ -187,9 +197,12 @@ module.exports = {
       })
       .from({ proc: "tbl_processing_details" })
       .leftJoin({ docs: "tbl_document_details" }, "docs.doc_id", "proc.doc_id")
-      .whereILike("docs.code_id", codeInput)
-      .orWhereILike("docs.document_description", descriptionInput)
-      .andWhere("proc.process_status", "Unassigned")
+      .where((qb) => {
+        qb.whereILike("docs.code_id", codeInput).orWhereILike(
+          "docs.document_description",
+          descriptionInput
+        );
+      })
       .orderBy("proc.process_id", "desc")
       .limit(pageSize)
       .offset(pageOffset);
