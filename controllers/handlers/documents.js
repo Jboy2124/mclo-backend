@@ -94,7 +94,7 @@ module.exports = {
       }
 
       // Adjust the path depending on your folder structure
-      const filePath = path.join(__dirname, "../../docs/JUL2025", fileName);
+      const filePath = path.join(__dirname, "../../docs/uploads", fileName);
 
       res.setHeader("Content-Type", "application/pdf");
       res.sendFile(filePath, (err) => {
