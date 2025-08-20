@@ -237,13 +237,11 @@ module.exports = {
           .json({ status: "ERROR", result: [] });
       }
 
-      return res
-        .status(StatusCodes.OK)
-        .json({
-          status: "SUCCESS",
-          result: response?.result,
-          totalRecords: response?.totalRecords,
-        });
+      return res.status(StatusCodes.OK).json({
+        status: "SUCCESS",
+        result: response?.result,
+        totalRecords: response?.totalRecords,
+      });
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
