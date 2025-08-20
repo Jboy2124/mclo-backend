@@ -172,12 +172,6 @@ module.exports = {
     const codeInput = `%${code}%`;
     const descriptionInput = `%${description}%`;
 
-    // const [{ count }] = await knex("tbl_document_details as doc")
-    //   .leftJoin("tbl_processing_details as proc", "doc.doc_id", "proc.doc_id")
-    //   .whereILike("doc.code_id", codeInput)
-    //   .orWhereILike("doc.document_description", descriptionInput)
-    //   .where("proc.process_status", "Unassigned")
-    //   .count({ count: "*" });
     const [{ count }] = await knex("tbl_document_details as doc")
       .leftJoin("tbl_processing_details as proc", "doc.doc_id", "proc.doc_id")
       .where((qb) => {
@@ -203,6 +197,7 @@ module.exports = {
           descriptionInput
         );
       })
+      .andWhere("proc.process_status", "Unassigned")
       .orderBy("proc.process_id", "desc")
       .limit(pageSize)
       .offset(pageOffset);
