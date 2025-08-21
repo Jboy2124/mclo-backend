@@ -11,6 +11,7 @@ const {
 const { isNullOrEmptyOrUndefined } = require("../../utilities/functions");
 const path = require("path");
 const { updatePdfTitle } = require("../../utilities/utilities");
+const { sendNotificationMail } = require("../middlewares/sendVerification");
 
 module.exports = {
   registerNewDocument: async (req, res) => {
@@ -198,10 +199,20 @@ module.exports = {
   },
   setDocumentsAssignee: async (req, res) => {
     try {
-      const { assignee, code, recommendation, remarks } = req.body;
+      const { assignee, documents, recommendation, remarks } = req.body;
+
+      const codes = documents.map((doc) => doc.code);
+      const assigneeIds = assignee.map((a) => a.id);
+      const emailInfo = assignee.map((e) => {
+        return {
+          toEmail: e.email,
+          toName: e.name,
+        };
+      });
+
       const result = await setDocumentAssigneeRepository({
-        assignee,
-        code,
+        assignee: assigneeIds,
+        code: codes,
         recommendation,
         remarks,
       });
@@ -213,6 +224,16 @@ module.exports = {
         });
       }
 
+      // 🔹 Loop through and send notifications (non-blocking)
+      for (const { toEmail, toName } of emailInfo) {
+        sendNotificationMail(
+          toEmail,
+          toName,
+          documents // full list [{code, description}]
+        ).catch((err) =>
+          console.error(`Failed to send notification to ${toEmail}:`, err)
+        );
+      }
       return res.status(StatusCodes.OK).json({ status: "SUCCESS", result: [] });
     } catch (error) {
       return res
