@@ -24,7 +24,7 @@ module.exports = {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "strict",
-          maxAge: 1 * 60 * 1000, // 1 min
+          maxAge: 15 * 60 * 1000, // 15 min
         });
 
         res.cookie("refreshToken", refreshToken, {

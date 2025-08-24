@@ -29,7 +29,7 @@ module.exports = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 1 * 60 * 1000, // 15 min
+        maxAge: 15 * 60 * 1000, // 15 min
       });
       return res.status(StatusCodes.OK).json({
         status: "SUCCESS",
