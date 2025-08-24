@@ -4,15 +4,18 @@ const helmet = require("helmet");
 const cors = require("cors");
 const compression = require("compression");
 const morgan = require("morgan");
-const corsConfig = require("./config/corsConfig");
+const { corsConfig } = require("./config/corsConfig");
+const cookieParser = require("cookie-parser");
 
 const registration = require("./routes/registration");
 const commonCodes = require("./routes/commonCodes");
 const account = require("./routes/account");
 const documents = require("./routes/documents");
 const users = require("./routes/users");
+const auth = require("./routes/auth");
 
 const app = express();
+app.use(cookieParser());
 const port = process.env.PRIMARY_PORT || process.env.SECONDARY_PORT;
 
 //security
@@ -45,6 +48,7 @@ app.use(account);
 app.use(commonCodes);
 app.use(documents);
 app.use(users);
+app.use(auth);
 
 app.listen(port, () => {
   console.log(`Server is running at port: ${port}`);
