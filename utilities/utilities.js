@@ -1,6 +1,7 @@
 const argon2 = require("argon2");
 const fs = require("fs");
 const { PDFDocument } = require("pdf-lib");
+const { generateAccessToken, generateRefreshToken } = require("./jwt");
 
 module.exports = {
   generateOTP: () => {
@@ -32,6 +33,18 @@ module.exports = {
     } catch (error) {
       console.error("❌ Error updating PDF title:", error);
       throw error;
+    }
+  },
+  getToken: (params, type) => {
+    let token = "";
+    if (params) {
+      const { email, fname, access } = params;
+      if (type === "access") {
+        token = generateAccessToken({ email, fname, access });
+      } else {
+        token = generateRefreshToken({ email, fname, access });
+      }
+      return token;
     }
   },
 };
