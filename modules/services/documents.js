@@ -204,4 +204,24 @@ module.exports = {
 
     return { status: "SUCCESS", result, totalRecords: count };
   },
+  getDocumentsByCodeIdServices: async (code) => {
+    let latestCode = [];
+
+    const row = await knex("tbl_document_details")
+      .select("code_id")
+      .where("code_id", code);
+
+    if (row.length > 0) {
+      latestCode = await knex("tbl_document_details")
+        .select("code_id")
+        .orderBy("doc_id", "desc")
+        .first();
+    }
+
+    return {
+      status: "SUCCESS",
+      result: latestCode,
+      message: row.length === 0 ? "Available" : "Not available",
+    };
+  },
 };

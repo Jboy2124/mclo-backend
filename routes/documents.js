@@ -9,6 +9,7 @@ const {
   getDocumentCountsPerType,
   setDocumentsAssignee,
   findProcessingDocuments,
+  findDocumentsByCodeId,
 } = require("../controllers/handlers/documents");
 const router = express.Router();
 const upload = require("../controllers/middlewares/fileUpload");
@@ -52,4 +53,5 @@ module.exports = router
     "/api/documents/v1/search-processing-documents",
     accessTokenVerification,
     findProcessingDocuments
-  );
+  )
+  .get("/api/documents/v1/code-query", findDocumentsByCodeId);

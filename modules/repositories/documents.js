@@ -8,6 +8,7 @@ const {
   getDocumentRecordsPerDocType,
   getDocumentById,
   searchProcessingDocuments,
+  getDocumentsByCodeIdServices,
 } = require("../services/documents");
 const { updateProcessByCode } = require("../services/processing");
 
@@ -146,6 +147,19 @@ module.exports = {
       };
     } catch (error) {
       return { status: "ERROR", result: [] };
+    }
+  },
+  getDocumentsByCodeIdSearch: async (code) => {
+    try {
+      const result = await getDocumentsByCodeIdServices(code);
+
+      return {
+        status: "SUCCESS",
+        result: result?.result,
+        message: result?.message,
+      };
+    } catch (error) {
+      return { status: "ERROR", message: error.message };
     }
   },
 };

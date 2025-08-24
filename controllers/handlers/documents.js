@@ -7,6 +7,7 @@ const {
   getDocumentCountPerDocType,
   setDocumentAssigneeRepository,
   searchProcessingDocumentsRepositories,
+  getDocumentsByCodeIdSearch,
 } = require("../../modules/repositories/documents");
 const { isNullOrEmptyOrUndefined } = require("../../utilities/functions");
 const path = require("path");
@@ -266,7 +267,28 @@ module.exports = {
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ status: "ERROR", message: error });
+        .json({ status: "ERROR", message: error.message });
+    }
+  },
+  findDocumentsByCodeId: async (req, res) => {
+    try {
+      const { code } = req.query;
+      const response = await getDocumentsByCodeIdSearch(code);
+      if (response.status !== "SUCCESS") {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ status: "ERROR", result: [], message: response?.message });
+      }
+
+      return res.status(StatusCodes.OK).json({
+        status: "SUCCESS",
+        result: response?.result,
+        message: response?.message,
+      });
+    } catch (error) {
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ status: "ERROR", message: error.message });
     }
   },
 };
