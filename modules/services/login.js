@@ -10,7 +10,13 @@ module.exports = {
   },
   getUser: async (account_id) => {
     const result = await knex
-      .select("user.title", "user.first_name", "user.last_name", "login.email")
+      .select(
+        "user.title",
+        "user.first_name",
+        "user.last_name",
+        "login.email",
+        "user.user_id"
+      )
       .from({ user: "tbl_user_account" })
       .leftJoin(
         { login: "tbl_login_account" },

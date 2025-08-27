@@ -16,42 +16,56 @@ const upload = require("../controllers/middlewares/fileUpload");
 const {
   accessTokenVerification,
 } = require("../controllers/middlewares/verifyToken");
+const {
+  getForReleasingDocuments,
+} = require("../controllers/handlers/releasing");
 
-module.exports = router
-  .post(
-    "/api/documents/v1/new-documents",
-    upload.array("attachments", 10),
-    registerNewDocument
-  )
-  .get(
-    "/api/documents/v1/document-list",
-    accessTokenVerification,
-    getDocumentList
-  )
-  .get("/api/documents/v1/view-pdf", accessTokenVerification, viewPdf)
-  .get(
-    "/api/documents/v1/processing-documents",
-    accessTokenVerification,
-    getProcessingDocumentList
-  )
-  .post(
-    "/api/documents/v1/documents-results",
-    accessTokenVerification,
-    findDocuments
-  )
-  .post(
-    "/api/documents/v1/documents-count",
-    accessTokenVerification,
-    getDocumentCountsPerType
-  )
-  .post(
-    "/api/documents/v1/new-processed-documents",
-    accessTokenVerification,
-    setDocumentsAssignee
-  )
-  .post(
-    "/api/documents/v1/search-processing-documents",
-    accessTokenVerification,
-    findProcessingDocuments
-  )
-  .get("/api/documents/v1/code-query", findDocumentsByCodeId);
+router.post(
+  "/api/documents/v1/new-documents",
+  upload.array("attachments", 10),
+  accessTokenVerification,
+  registerNewDocument
+);
+router.get(
+  "/api/documents/v1/code-query",
+  accessTokenVerification,
+  findDocumentsByCodeId
+);
+router.get(
+  "/api/documents/v1/document-list",
+  accessTokenVerification,
+  getDocumentList
+);
+router.get("/api/documents/v1/view-pdf", accessTokenVerification, viewPdf);
+router.get(
+  "/api/documents/v1/processing-documents",
+  accessTokenVerification,
+  getProcessingDocumentList
+);
+router.post(
+  "/api/documents/v1/documents-results",
+  accessTokenVerification,
+  findDocuments
+);
+router.post(
+  "/api/documents/v1/documents-count",
+  accessTokenVerification,
+  getDocumentCountsPerType
+);
+router.post(
+  "/api/documents/v1/new-processed-documents",
+  accessTokenVerification,
+  setDocumentsAssignee
+);
+router.post(
+  "/api/documents/v1/search-processing-documents",
+  accessTokenVerification,
+  findProcessingDocuments
+);
+router.get(
+  "/api/documents/v1/for-releasing-documents",
+  accessTokenVerification,
+  getForReleasingDocuments
+);
+
+module.exports = router;
