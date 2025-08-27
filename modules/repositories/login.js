@@ -20,6 +20,7 @@ module.exports = {
               fname: user?.first_name,
               lname: user?.last_name,
               email: user?.email,
+              userId: user?.user_id,
             },
           };
         }

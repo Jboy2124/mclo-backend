@@ -9,13 +9,13 @@ module.exports = {
       const refreshToken = req.cookies.refreshToken;
       if (!refreshToken) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.UNAUTHORIZED)
           .json({ status: "ERROR", message: "No refresh token provided" });
       }
       const decoded = verifyToken(refreshToken, refreshKey);
 
       if (!decoded || decoded.status === "ERROR") {
-        return res.status(StatusCodes.FORBIDDEN).json(
+        return res.status(StatusCodes.UNAUTHORIZED).json(
           decoded || {
             status: "ERROR",
             message: "Invalid or expired refresh token",
@@ -23,13 +23,19 @@ module.exports = {
         );
       }
 
-      const newAccessToken = generateAccessToken(decoded);
+      const payload = {
+        email: decoded.email,
+        fname: decoded.fname,
+        lname: decoded.lname,
+      };
+
+      const newAccessToken = generateAccessToken(payload);
 
       res.cookie("accessToken", newAccessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 15 * 60 * 1000, // 15 min
+        maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day
       });
       return res.status(StatusCodes.OK).json({
         status: "SUCCESS",

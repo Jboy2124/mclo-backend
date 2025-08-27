@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 
-const whiteList = ["http://localhost:8082"];
+const whiteList = ["http://localhost:8082", "https://localhost:8082"];
 
 module.exports = {
   corsConfig: {
