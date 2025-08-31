@@ -18,6 +18,7 @@ const {
 } = require("../controllers/middlewares/verifyToken");
 const {
   getForReleasingDocuments,
+  insertNewReleasedDocument,
 } = require("../controllers/handlers/releasing");
 
 router.post(
@@ -36,7 +37,7 @@ router.get(
   accessTokenVerification,
   getDocumentList
 );
-router.get("/api/documents/v1/view-pdf", accessTokenVerification, viewPdf);
+router.get("/api/documents/v1/view-pdf", viewPdf);
 router.get(
   "/api/documents/v1/processing-documents",
   accessTokenVerification,
@@ -66,6 +67,12 @@ router.get(
   "/api/documents/v1/for-releasing-documents",
   accessTokenVerification,
   getForReleasingDocuments
+);
+
+router.post(
+  "/api/documents/v1/add-new-released-document",
+  accessTokenVerification,
+  insertNewReleasedDocument
 );
 
 module.exports = router;
