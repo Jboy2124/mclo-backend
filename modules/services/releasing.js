@@ -20,6 +20,7 @@ module.exports = {
       const result = await knex("tbl_processing_details as proc")
         .select({
           processId: "proc.process_id",
+          docId: "doc.doc_id",
           codeId: "doc.code_id",
           description: "doc.document_description",
           dateAssigned: "proc.date_assigned",
@@ -42,6 +43,24 @@ module.exports = {
     } catch (error) {
       console.error("Error fetching documents for release:", error);
       throw error;
+    }
+  },
+  insertReleaseDocument: async (data) => {
+    try {
+      const result = await knex("tbl_releasing_details").insert({
+        doc_id: data.docId,
+        release_date: data.releasedDateTime,
+        liaison: data.liaison,
+        actual_released_date: data.releasedDateTime,
+        received_by: data.receivedBy,
+        remarks: data.remarks,
+        status: "Released",
+      });
+      if (result) {
+        return { status: "SUCCESS", result: result };
+      }
+    } catch (err) {
+      return { status: "ERROR", message: err.message };
     }
   },
 };

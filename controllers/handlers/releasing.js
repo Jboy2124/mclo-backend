@@ -1,6 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const {
   getDocumentsForReleaseRepo,
+  addReleasedDocument,
 } = require("../../modules/repositories/releasing");
 
 module.exports = {
@@ -22,6 +23,29 @@ module.exports = {
       });
     } catch (err) {
       return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: "ERROR",
+        message: err.message,
+      });
+    }
+  },
+  insertNewReleasedDocument: async (req, res) => {
+    try {
+      const data = req.body;
+      const response = await addReleasedDocument(data);
+      if (response.status !== "SUCCESS") {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          status: "ERROR",
+          result: [],
+          message: response.message,
+        });
+      }
+
+      return res.status(StatusCodes.OK).json({
+        status: "SUCCESS",
+        result: response.result,
+      });
+    } catch (err) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         status: "ERROR",
         message: err.message,
       });
