@@ -93,7 +93,7 @@ module.exports = {
 
     const [{ count }] = await knex("tbl_processing_details as proc")
       .leftJoin({ docs: "tbl_document_details" }, "docs.doc_id", "proc.doc_id")
-      .where("proc.process_status", "Unassigned")
+      .whereNot("proc.process_status", "Approved")
       .count({ count: "proc.process_id" });
 
     const result = await knex
@@ -101,10 +101,11 @@ module.exports = {
         code: "docs.code_id",
         description: "docs.document_description",
         attachments: "docs.document_path",
+        status: "proc.process_status",
       })
       .from({ proc: "tbl_processing_details" })
       .leftJoin({ docs: "tbl_document_details" }, "docs.doc_id", "proc.doc_id")
-      .where("proc.process_status", "Unassigned")
+      .whereNot("proc.process_status", "Approved")
       .orderBy("proc.process_id", "desc")
       .limit(pageSize)
       .offset(pageOffset);
@@ -180,7 +181,7 @@ module.exports = {
           descriptionInput
         );
       })
-      .andWhere("proc.process_status", "Unassigned")
+      .andWhereNot("proc.process_status", "Approved")
       .count({ count: "*" });
 
     const result = await knex
@@ -188,6 +189,7 @@ module.exports = {
         code: "docs.code_id",
         description: "docs.document_description",
         attachments: "docs.document_path",
+        status: "proc.process_status",
       })
       .from({ proc: "tbl_processing_details" })
       .leftJoin({ docs: "tbl_document_details" }, "docs.doc_id", "proc.doc_id")
@@ -197,7 +199,7 @@ module.exports = {
           descriptionInput
         );
       })
-      .andWhere("proc.process_status", "Unassigned")
+      .andWhereNot("proc.process_status", "Approved")
       .orderBy("proc.process_id", "desc")
       .limit(pageSize)
       .offset(pageOffset);

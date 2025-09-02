@@ -18,6 +18,7 @@ module.exports = {
       account_id: login.account_id,
       email: login.email,
       password: login.password,
+      access_level: 3,
     });
     return login_id;
   },

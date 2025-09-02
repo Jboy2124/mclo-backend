@@ -15,7 +15,8 @@ module.exports = {
         "user.first_name",
         "user.last_name",
         "login.email",
-        "user.user_id"
+        "user.user_id",
+        "login.access_level"
       )
       .from({ user: "tbl_user_account" })
       .leftJoin(

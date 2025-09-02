@@ -5,6 +5,7 @@ const {
   commonNatureOfCommunication,
   commonReceivedThru,
   commonDocumentType,
+  commonAccessLevel,
 } = require("../services/codes");
 
 module.exports = {
@@ -69,6 +70,28 @@ module.exports = {
       return { status: "SUCCESS", result: result };
     } catch (error) {
       return { status: "ERROR", result: [] };
+    }
+  },
+  getCommonAccessLevel: async () => {
+    try {
+      const result = await commonAccessLevel();
+      if (result.status !== "SUCCESS") {
+        return {
+          status: "ERROR",
+          result: [],
+        };
+      }
+
+      return {
+        status: "SUCCESS",
+        result: result,
+      };
+    } catch (error) {
+      return {
+        status: "ERROR",
+        result: [],
+        message: error.message,
+      };
     }
   },
 };

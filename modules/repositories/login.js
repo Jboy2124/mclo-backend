@@ -21,6 +21,7 @@ module.exports = {
               lname: user?.last_name,
               email: user?.email,
               userId: user?.user_id,
+              accessLevel: user?.access_level,
             },
           };
         }

@@ -5,6 +5,7 @@ const {
   getNatureOfCommunications,
   getReceivedThru,
   getDocumentTypes,
+  getAccessLevel,
 } = require("../controllers/handlers/commonCodes");
 const {
   accessTokenVerification,
@@ -32,4 +33,9 @@ module.exports = router
     "/api/common-codes/v1/document-type",
     accessTokenVerification,
     getDocumentTypes
+  )
+  .get(
+    "/api/common-codes/v1/access-level",
+    accessTokenVerification,
+    getAccessLevel
   );

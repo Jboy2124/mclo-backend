@@ -3,6 +3,7 @@ const {
   getDocumentsForReleaseRepo,
   addReleasedDocument,
 } = require("../../modules/repositories/releasing");
+const { updatePdfTitle } = require("../../utilities/utilities");
 
 module.exports = {
   getForReleasingDocuments: async (request, response) => {
@@ -30,8 +31,19 @@ module.exports = {
   },
   insertNewReleasedDocument: async (req, res) => {
     try {
-      const data = req.body;
-      const response = await addReleasedDocument(data);
+      const data = JSON.parse(req.body.payload);
+      const attachments = req.files || [];
+      // Update titles for each file uploaded
+      for (const file of attachments) {
+        await updatePdfTitle(file.path, data.codeId);
+      }
+      const filePaths = attachments.map((file) => file.path);
+      const payload = {
+        ...req.body,
+        path: filePaths.join(";"),
+      };
+
+      const response = await addReleasedDocument(payload);
       if (response.status !== "SUCCESS") {
         return res.status(StatusCodes.BAD_REQUEST).json({
           status: "ERROR",
