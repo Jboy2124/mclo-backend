@@ -5,6 +5,7 @@ const {
   getNatureOfCommunications,
   getReceivedThru,
   getDocumentTypes,
+  getCommonAccessLevel,
 } = require("../../modules/repositories/codes");
 
 module.exports = {
@@ -48,6 +49,26 @@ module.exports = {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
         .json({ status: "ERROR", message: "Internal server error" });
+    }
+  },
+  getAccessLevel: async (req, res) => {
+    try {
+      const response = await getCommonAccessLevel();
+      if (response.status !== "SUCCESS") {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ status: "ERROR", result: [] });
+      }
+
+      return res
+        .status(StatusCodes.OK)
+        .json({ status: "SUCCESS", result: response.result });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: "ERROR",
+        result: [],
+        message: error.message,
+      });
     }
   },
 };

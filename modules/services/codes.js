@@ -56,4 +56,12 @@ module.exports = {
 
     return result;
   },
+  commonAccessLevel: async () => {
+    const result = await knex("tbl_access_level").select({
+      id: "access_level",
+      value: "access_module",
+    });
+
+    return { status: "SUCCESS", result };
+  },
 };

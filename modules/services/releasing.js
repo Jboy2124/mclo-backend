@@ -47,13 +47,16 @@ module.exports = {
   },
   insertReleaseDocument: async (data) => {
     try {
+      const { payload, path } = data;
+      const payloadData = JSON.parse(payload);
       const result = await knex("tbl_releasing_details").insert({
-        doc_id: data.docId,
-        release_date: data.releasedDateTime,
-        liaison: data.liaison,
-        actual_released_date: data.releasedDateTime,
-        received_by: data.receivedBy,
-        remarks: data.remarks,
+        doc_id: payloadData.docId,
+        release_date: payloadData.releasedDateTime,
+        liaison: payloadData.liaison,
+        actual_released_date: payloadData.releasedDateTime,
+        received_by: payloadData.receivedBy,
+        remarks: payloadData.remarks,
+        file_path: path,
         status: "Released",
       });
       if (result) {

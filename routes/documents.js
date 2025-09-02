@@ -71,6 +71,7 @@ router.get(
 
 router.post(
   "/api/documents/v1/add-new-released-document",
+  upload.array("attachments", 10),
   accessTokenVerification,
   insertNewReleasedDocument
 );
