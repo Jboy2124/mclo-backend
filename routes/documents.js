@@ -10,6 +10,7 @@ const {
   setDocumentsAssignee,
   findProcessingDocuments,
   findDocumentsByCodeId,
+  getAssignedDocumentList,
 } = require("../controllers/handlers/documents");
 const router = express.Router();
 const upload = require("../controllers/middlewares/fileUpload");
@@ -74,6 +75,12 @@ router.post(
   upload.array("attachments", 10),
   accessTokenVerification,
   insertNewReleasedDocument
+);
+
+router.get(
+  "/api/documents/v1/assigned-documents",
+  accessTokenVerification,
+  getAssignedDocumentList
 );
 
 module.exports = router;

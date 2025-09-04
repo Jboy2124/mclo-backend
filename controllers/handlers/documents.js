@@ -8,6 +8,7 @@ const {
   setDocumentAssigneeRepository,
   searchProcessingDocumentsRepositories,
   getDocumentsByCodeIdSearch,
+  getAssignedProcessedDocumentsRepo,
 } = require("../../modules/repositories/documents");
 const { isNullOrEmptyOrUndefined } = require("../../utilities/functions");
 const path = require("path");
@@ -289,6 +290,33 @@ module.exports = {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
         .json({ status: "ERROR", message: error.message });
+    }
+  },
+  getAssignedDocumentList: async (req, res) => {
+    try {
+      const { assignee, page } = req.query;
+      const response = await getAssignedProcessedDocumentsRepo({
+        assigneeId: assignee,
+        pageNumber: page,
+      });
+      if (response.status !== "SUCCESS") {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ status: "ERROR", result: [], message: response.message });
+      }
+
+      return res.status(StatusCodes.OK).json({
+        status: "SUCCESS",
+        result: response.result,
+        message: "",
+        totalRecords: response.totalRecords,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: "ERROR",
+        result: [],
+        message: error.message,
+      });
     }
   },
 };

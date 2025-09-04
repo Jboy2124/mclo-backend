@@ -10,7 +10,10 @@ const {
   searchProcessingDocuments,
   getDocumentsByCodeIdServices,
 } = require("../services/documents");
-const { updateProcessByCode } = require("../services/processing");
+const {
+  updateProcessByCode,
+  getAssignedProcessedDocuments,
+} = require("../services/processing");
 
 module.exports = {
   newDocuments: async (payload) => {
@@ -160,6 +163,30 @@ module.exports = {
       };
     } catch (error) {
       return { status: "ERROR", message: error.message };
+    }
+  },
+  getAssignedProcessedDocumentsRepo: async ({ assigneeId, pageNumber }) => {
+    try {
+      const response = await getAssignedProcessedDocuments(
+        assigneeId,
+        pageNumber
+      );
+      if (response.status !== "SUCCESS") {
+        return {
+          status: "ERROR",
+          result: [],
+          message: response.message,
+        };
+      }
+
+      return {
+        status: "SUCCESS",
+        result: response.result,
+        message: "",
+        totalRecords: response.totalRecords,
+      };
+    } catch (error) {
+      return { status: "ERROR", result: [], message: error.message };
     }
   },
 };
