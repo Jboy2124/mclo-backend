@@ -13,6 +13,7 @@ const {
 const {
   updateProcessByCode,
   getAssignedProcessedDocuments,
+  updateProcessByCodeAndStatus,
 } = require("../services/processing");
 
 module.exports = {
@@ -55,9 +56,21 @@ module.exports = {
   getDocumentsRepositories: async () => {
     try {
       const result = await getDocumentsServices();
-      if (result.status === "SUCCESS") {
-        return result;
+      if (result.status !== "SUCCESS") {
+        return {
+          status: "ERROR",
+          result: [],
+          message: result.message,
+          totalRecords: 1,
+        };
       }
+
+      return {
+        status: "SUCCESS",
+        result: result.result,
+        message: "",
+        totalRecords: result.totalRecords,
+      };
     } catch (err) {
       return { status: "ERROR", result: [] };
     }
@@ -126,6 +139,34 @@ module.exports = {
       return { status: "SUCCESS", result: [] };
     } catch (error) {
       return { status: "ERROR", result: [] };
+    }
+  },
+  updateProcessStatus: async (data) => {
+    try {
+      const { status, processId } = data;
+      const response = await updateProcessByCodeAndStatus({
+        status,
+        processId,
+      });
+      if (response.status !== "SUCCESS") {
+        return {
+          status: "ERROR",
+          result: [],
+          message: response.message,
+        };
+      }
+
+      return {
+        status: "SUCCESS",
+        result: response.result,
+        message: "",
+      };
+    } catch (error) {
+      return {
+        status: "ERROR",
+        result: [],
+        message: error.message,
+      };
     }
   },
   searchProcessingDocumentsRepositories: async ({

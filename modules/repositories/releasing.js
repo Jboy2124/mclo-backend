@@ -4,20 +4,22 @@ const {
 } = require("../services/releasing");
 
 module.exports = {
-  getDocumentsForReleaseRepo: async ({ page, user }) => {
+  getDocumentsForReleaseRepo: async ({ page }) => {
     try {
-      const res = await getDocumentsForRelease({ page, user });
+      const res = await getDocumentsForRelease({ page });
       if (res.status !== "SUCCESS") {
         return {
           status: "ERROR",
           result: [],
+          message: res.message,
         };
       }
 
       return {
         status: "SUCCESS",
         result: res.result,
-        totalRecords: res?.totalRecords,
+        totalRecords: res.totalRecords,
+        message: res.message,
       };
     } catch (error) {
       return { status: "ERROR", message: error.message };
@@ -33,6 +35,7 @@ module.exports = {
       return {
         status: "SUCCESS",
         result: response.result,
+        message: "",
       };
     } catch (error) {
       return {

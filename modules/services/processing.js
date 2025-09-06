@@ -14,6 +14,23 @@ module.exports = {
 
     return result;
   },
+  updateProcessByCodeAndStatus: async (data) => {
+    try {
+      const result = await knex("tbl_processing_details")
+        .update({
+          process_status: data.status,
+        })
+        .where("process_id", data.processId);
+
+      return {
+        status: "SUCCESS",
+        result: result,
+        message: "",
+      };
+    } catch (error) {
+      return { status: "ERROR", result: [], message: error.message };
+    }
+  },
   getAssignedProcessedDocuments: async (assigneeId, pageNumber) => {
     try {
       const page = pageNumber || 1;
@@ -22,7 +39,6 @@ module.exports = {
 
       const [{ count }] = await knex("tbl_processing_details as proc")
         .leftJoin("tbl_document_details as doc", "doc.doc_id", "proc.doc_id")
-        .where("proc.process_status", "Assigned")
         .whereRaw("FIND_IN_SET(?, REPLACE(proc.assigned_to, ' ', ''))", [
           assigneeId,
         ])
@@ -37,12 +53,12 @@ module.exports = {
           description: "docs.document_description",
           path: "docs.document_path",
           additionalPath: "docs.additional_document_path",
-          date_assigned: "proc.date_assigned",
+          dateAssigned: "proc.date_assigned",
           recommendations: "proc.recommendations",
           remarks: "proc.remarks",
+          status: "proc.process_status",
         })
         .leftJoin("tbl_document_details as docs", "proc.doc_id", "docs.doc_id")
-        .where("proc.process_status", "Assigned")
         .whereRaw("FIND_IN_SET(?, REPLACE(proc.assigned_to, ' ', ''))", [
           assigneeId,
         ])

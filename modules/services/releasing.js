@@ -1,69 +1,71 @@
 const knex = require("../../config/knexConfig");
 
 module.exports = {
-  getDocumentsForRelease: async ({ page, user }) => {
+  getDocumentsForRelease: async ({ page }) => {
     const pageNumber = page || 1;
     const pageSize = 15;
     const pageOffset = (pageNumber - 1) * pageSize;
 
-    const user_Id = `%${user}%`;
+    // const user_Id = `%${user}%`;
 
     try {
-      const [{ count }] = await knex("tbl_processing_details as proc")
-        .leftJoin("tbl_document_details as doc", "proc.doc_id", "doc.doc_id")
-        .where((qb) => {
-          qb.whereILike("proc.assigned_to", user_Id);
-        })
-        .andWhere("proc.process_status", "Approved")
+      const [{ count }] = await knex("tbl_releasing_details as rel")
+        .leftJoin("tbl_document_details as doc", "rel.doc_id", "doc.doc_id")
+        // .where((qb) => {
+        //   qb.whereILike("proc.assigned_to", user_Id);
+        // })
+        // .andWhere("proc.process_status", "Approved")
         .count({ count: "*" });
 
-      const result = await knex("tbl_processing_details as proc")
+      const result = await knex("tbl_releasing_details as rel")
         .select({
-          processId: "proc.process_id",
+          releaseId: "rel.releasing_id",
           docId: "doc.doc_id",
           codeId: "doc.code_id",
           description: "doc.document_description",
-          dateAssigned: "proc.date_assigned",
-          assignee: "proc.assigned_to",
-          recommendations: "proc.recommendations",
-          remarks: "proc.remarks",
-          status: "proc.process_status",
-          attachment: "doc.document_path",
+          initialReleaseData: "rel.release_date",
+          status: "rel.status",
         })
-        .leftJoin("tbl_document_details as doc", "proc.doc_id", "doc.doc_id")
-        .where((qb) => {
-          qb.whereILike("proc.assigned_to", user_Id);
-        })
-        .andWhere("proc.process_status", "Approved")
-        .orderBy("proc.process_id", "desc")
+        .leftJoin("tbl_document_details as doc", "rel.doc_id", "doc.doc_id")
+        // .where((qb) => {
+        //   qb.whereILike("proc.assigned_to", user_Id);
+        // })
+        // .andWhere("proc.process_status", "Approved")
+        .orderBy("rel.releasing_id", "desc")
         .limit(pageSize)
         .offset(pageOffset);
 
-      return { status: "SUCCESS", result, totalRecords: count ?? 0 };
+      return {
+        status: "SUCCESS",
+        result,
+        message: "",
+        totalRecords: count ?? 1,
+      };
     } catch (error) {
       console.error("Error fetching documents for release:", error);
-      throw error;
+
+      return {
+        status: "ERROR",
+        result: [],
+        message: error.message,
+        totalRecords: 1,
+      };
     }
   },
   insertReleaseDocument: async (data) => {
     try {
-      const { payload, path } = data;
-      const payloadData = JSON.parse(payload);
+      // const { payload } = data;
+      // const payloadData = JSON.parse(payload);
       const result = await knex("tbl_releasing_details").insert({
-        doc_id: payloadData.docId,
-        release_date: payloadData.releasedDateTime,
-        liaison: payloadData.liaison,
-        actual_released_date: payloadData.releasedDateTime,
-        received_by: payloadData.receivedBy,
-        remarks: payloadData.remarks,
-        file_path: path,
-        status: "Released",
+        doc_id: data,
+        release_date: new Date(),
+        status: "For releasing",
       });
       if (result) {
-        return { status: "SUCCESS", result: result };
+        return { status: "SUCCESS", result, message: "" };
       }
     } catch (err) {
-      return { status: "ERROR", message: err.message };
+      return { status: "ERROR", result: [], message: err.message };
     }
   },
 };

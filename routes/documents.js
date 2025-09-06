@@ -11,6 +11,7 @@ const {
   findProcessingDocuments,
   findDocumentsByCodeId,
   getAssignedDocumentList,
+  updateProcessDocumentStatus,
 } = require("../controllers/handlers/documents");
 const router = express.Router();
 const upload = require("../controllers/middlewares/fileUpload");
@@ -33,11 +34,7 @@ router.get(
   accessTokenVerification,
   findDocumentsByCodeId
 );
-router.get(
-  "/api/documents/v1/document-list",
-  accessTokenVerification,
-  getDocumentList
-);
+router.get("/api/documents/v1/document-list", getDocumentList);
 router.get("/api/documents/v1/view-pdf", viewPdf);
 router.get(
   "/api/documents/v1/processing-documents",
@@ -81,6 +78,11 @@ router.get(
   "/api/documents/v1/assigned-documents",
   accessTokenVerification,
   getAssignedDocumentList
+);
+router.post(
+  "/api/documents/v1/update-process-status",
+  accessTokenVerification,
+  updateProcessDocumentStatus
 );
 
 module.exports = router;
