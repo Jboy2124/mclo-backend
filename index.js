@@ -25,7 +25,7 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         // Allow iframe embedding from localhost:8082:
-        frameAncestors: ["'self'", "http://localhost:8082"],
+        frameAncestors: ["'self'", "http://192.168.1.14:8082"],
         // Add other directives as needed, e.g.:
         scriptSrc: ["'self'"],
         // ... your other directives ...
