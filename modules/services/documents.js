@@ -48,43 +48,65 @@ module.exports = {
     }
   },
   getDocumentsServices: async (pageNumber) => {
-    const page = pageNumber || 1;
-    const pageSize = 15;
-    const pageOffset = (page - 1) * pageSize;
+    try {
+      const page = pageNumber || 1;
+      const pageSize = 15;
+      const pageOffset = (page - 1) * pageSize;
 
-    const [{ count }] = await knex("tbl_document_details as doc")
-      .leftJoin("tbl_receiving_details as rec", "doc.doc_id", "rec.doc_id")
-      .count({ count: "*" });
+      const [{ count }] = await knex("tbl_document_details as doc")
+        .leftJoin("tbl_receiving_details as rec", "doc.doc_id", "rec.doc_id")
+        .leftJoin(
+          { proc: "tbl_processing_details" },
+          "doc.doc_id",
+          "proc.doc_id"
+        )
+        .leftJoin({ rel: "tbl_releasing_details" }, "doc.doc_id", "rel.doc_id")
+        .count({ count: "*" });
 
-    const result = await knex
-      .select({
-        code_id: "docs.code_id",
-        description: "docs.document_description",
-        attachments: "document_path",
-        forwardedBy: "rec.forwarded_by",
-        natureOfComm: "rec.nature_of_communication",
-        receivedThru: "rec.received_through",
-        receivedDate: "rec.received_date",
-        receivedTime: "rec.received_time",
-        status: "rec.status",
-        assignedTo: "proc.assigned_to",
-        recommendations: "proc.recommendations",
-        remarks: "proc.remarks",
-        dateAssigned: "proc.date_assigned",
-        processStatus: "proc.process_status",
-      })
-      .from({ docs: "tbl_document_details" })
-      .leftJoin({ rec: "tbl_receiving_details" }, "docs.doc_id", "rec.doc_id")
-      .leftJoin(
-        { proc: "tbl_processing_details" },
-        "docs.doc_id",
-        "proc.doc_id"
-      )
-      .orderBy("docs.doc_id", "desc")
-      .limit(pageSize)
-      .offset(pageOffset);
+      const result = await knex
+        .select({
+          code_id: "docs.code_id",
+          description: "docs.document_description",
+          attachments: "document_path",
+          forwardedBy: "rec.forwarded_by",
+          natureOfComm: "rec.nature_of_communication",
+          receivedThru: "rec.received_through",
+          receivedDate: "rec.received_date",
+          receivedTime: "rec.received_time",
+          status: "rec.status",
+          assignedTo: "proc.assigned_to",
+          recommendations: "proc.recommendations",
+          remarks: "proc.remarks",
+          dateAssigned: "proc.date_assigned",
+          processStatus: "proc.process_status",
+          releasingId: "rel.releasing_id",
+          releaseDate: "rel.release_date",
+          releaseStatus: "rel.status",
+          liaison: "rel.liaison",
+          receivedBy: "rel.received_by",
+          actualReleasedDate: "rel.actual_released_date",
+        })
+        .from({ docs: "tbl_document_details" })
+        .leftJoin({ rec: "tbl_receiving_details" }, "docs.doc_id", "rec.doc_id")
+        .leftJoin(
+          { proc: "tbl_processing_details" },
+          "docs.doc_id",
+          "proc.doc_id"
+        )
+        .leftJoin({ rel: "tbl_releasing_details" }, "docs.doc_id", "rel.doc_id")
+        .orderBy("docs.doc_id", "desc")
+        .limit(pageSize)
+        .offset(pageOffset);
 
-    return { status: "SUCCESS", result: result, totalRecords: count };
+      return { status: "SUCCESS", result, message: "", totalRecords: count };
+    } catch (error) {
+      return {
+        status: "ERROR",
+        result: [],
+        message: error.message,
+        totalRecords: 1,
+      };
+    }
   },
   getProcessingDocuments: async ({ page }) => {
     const pageNumber = page || 1;
@@ -98,10 +120,14 @@ module.exports = {
 
     const result = await knex
       .select({
+        processId: "proc.process_id",
+        docId: "docs.doc_id",
         code: "docs.code_id",
         description: "docs.document_description",
         attachments: "docs.document_path",
         status: "proc.process_status",
+        assignedTo: "proc.assigned_to",
+        dateAssigned: "proc.date_assigned",
       })
       .from({ proc: "tbl_processing_details" })
       .leftJoin({ docs: "tbl_document_details" }, "docs.doc_id", "proc.doc_id")
@@ -113,50 +139,72 @@ module.exports = {
     return { status: "SUCCESS", result, totalRecords: count };
   },
   searchDocuments: async ({ code, description, forwardedBy, page }) => {
-    const pageNumber = page || 1;
-    const pageSize = 15;
-    const pageOffset = (pageNumber - 1) * pageSize;
+    try {
+      const pageNumber = page || 1;
+      const pageSize = 15;
+      const pageOffset = (pageNumber - 1) * pageSize;
 
-    const codeInput = `%${code}%`;
-    const descriptionInput = `%${description}%`;
-    const forwardedbyInput = `%${forwardedBy}%`;
+      const codeInput = `%${code}%`;
+      const descriptionInput = `%${description}%`;
+      const forwardedbyInput = `%${forwardedBy}%`;
 
-    const [{ count }] = await knex("tbl_document_details as doc")
-      .leftJoin("tbl_receiving_details as rec", "doc.doc_id", "rec.doc_id")
-      .whereILike("doc.code_id", codeInput)
-      .orWhereILike("doc.document_description", descriptionInput)
-      .orWhereILike("rec.forwarded_by", forwardedbyInput)
-      .count({ count: "*" });
+      const [{ count }] = await knex("tbl_document_details as doc")
+        .leftJoin("tbl_receiving_details as rec", "doc.doc_id", "rec.doc_id")
+        .leftJoin(
+          { proc: "tbl_processing_details" },
+          "doc.doc_id",
+          "proc.doc_id"
+        )
+        .leftJoin({ rel: "tbl_releasing_details" }, "doc.doc_id", "rel.doc_id")
+        .whereILike("doc.code_id", codeInput)
+        .orWhereILike("doc.document_description", descriptionInput)
+        .orWhereILike("rec.forwarded_by", forwardedbyInput)
+        .count({ count: "*" });
 
-    const result = await knex
-      .select({
-        docId: "doc.doc_id",
-        code_id: "doc.code_id",
-        description: "doc.document_description",
-        attachments: "doc.document_path",
-        forwardedBy: "rec.forwarded_by",
-        natureOfComm: "rec.nature_of_communication",
-        receivedThru: "rec.received_through",
-        receivedDate: "rec.received_date",
-        receivedTime: "rec.received_time",
-        status: "rec.status",
-        assignedTo: "proc.assigned_to",
-        recommendations: "proc.recommendations",
-        remarks: "proc.remarks",
-        dateAssigned: "proc.date_assigned",
-        processStatus: "proc.process_status",
-      })
-      .from("tbl_document_details as doc")
-      .leftJoin("tbl_receiving_details as rec", "doc.doc_id", "rec.doc_id")
-      .leftJoin("tbl_processing_details as proc", "doc.doc_id", "proc.doc_id")
-      .whereILike("doc.code_id", codeInput)
-      .orWhereILike("doc.document_description", descriptionInput)
-      .orWhereILike("rec.forwarded_by", forwardedbyInput)
-      .orderBy("doc.doc_id", "desc")
-      .limit(pageSize)
-      .offset(pageOffset);
+      const result = await knex
+        .select({
+          docId: "doc.doc_id",
+          code_id: "doc.code_id",
+          description: "doc.document_description",
+          attachments: "doc.document_path",
+          forwardedBy: "rec.forwarded_by",
+          natureOfComm: "rec.nature_of_communication",
+          receivedThru: "rec.received_through",
+          receivedDate: "rec.received_date",
+          receivedTime: "rec.received_time",
+          status: "rec.status",
+          assignedTo: "proc.assigned_to",
+          recommendations: "proc.recommendations",
+          remarks: "proc.remarks",
+          dateAssigned: "proc.date_assigned",
+          processStatus: "proc.process_status",
+          releasingId: "rel.releasing_id",
+          releaseDate: "rel.release_date",
+          releaseStatus: "rel.status",
+          liaison: "rel.liaison",
+          receivedBy: "rel.received_by",
+          actualReleasedDate: "rel.actual_released_date",
+        })
+        .from("tbl_document_details as doc")
+        .leftJoin("tbl_receiving_details as rec", "doc.doc_id", "rec.doc_id")
+        .leftJoin("tbl_processing_details as proc", "doc.doc_id", "proc.doc_id")
+        .leftJoin({ rel: "tbl_releasing_details" }, "doc.doc_id", "rel.doc_id")
+        .whereILike("doc.code_id", codeInput)
+        .orWhereILike("doc.document_description", descriptionInput)
+        .orWhereILike("rec.forwarded_by", forwardedbyInput)
+        .orderBy("doc.doc_id", "desc")
+        .limit(pageSize)
+        .offset(pageOffset);
 
-    return { status: "SUCCESS", result, totalRecords: count };
+      return { status: "SUCCESS", result, message: "", totalRecords: count };
+    } catch (error) {
+      return {
+        status: "ERROR",
+        result: [],
+        message: error.message,
+        totalRecords: 1,
+      };
+    }
   },
   getDocumentRecordsPerDocType: async ({ docId }) => {
     const [{ count }] = await knex("tbl_document_details").count({
@@ -186,10 +234,14 @@ module.exports = {
 
     const result = await knex
       .select({
+        processId: "proc.process_id",
+        docId: "docs.doc_id",
         code: "docs.code_id",
         description: "docs.document_description",
         attachments: "docs.document_path",
         status: "proc.process_status",
+        assignedTo: "proc.assigned_to",
+        dateAssigned: "proc.date_assigned",
       })
       .from({ proc: "tbl_processing_details" })
       .leftJoin({ docs: "tbl_document_details" }, "docs.doc_id", "proc.doc_id")

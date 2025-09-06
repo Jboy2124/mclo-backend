@@ -8,12 +8,13 @@ const { updatePdfTitle } = require("../../utilities/utilities");
 module.exports = {
   getForReleasingDocuments: async (request, response) => {
     try {
-      const { page, user } = request.query;
-      const res = await getDocumentsForReleaseRepo({ page, user });
+      const { page } = request.query;
+      const res = await getDocumentsForReleaseRepo({ page });
       if (res.status !== "SUCCESS") {
         return response.status(StatusCodes.BAD_REQUEST).json({
           status: "ERROR",
           result: [],
+          message: response.message,
         });
       }
 
@@ -21,6 +22,7 @@ module.exports = {
         status: "SUCCESS",
         result: res.result,
         totalRecords: res?.totalRecords,
+        message: "",
       });
     } catch (err) {
       return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

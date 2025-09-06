@@ -9,11 +9,13 @@ const {
   searchProcessingDocumentsRepositories,
   getDocumentsByCodeIdSearch,
   getAssignedProcessedDocumentsRepo,
+  updateProcessStatus,
 } = require("../../modules/repositories/documents");
 const { isNullOrEmptyOrUndefined } = require("../../utilities/functions");
 const path = require("path");
 const { updatePdfTitle } = require("../../utilities/utilities");
 const { sendNotificationMail } = require("../middlewares/sendVerification");
+const { addReleasedDocument } = require("../../modules/repositories/releasing");
 
 module.exports = {
   registerNewDocument: async (req, res) => {
@@ -70,7 +72,14 @@ module.exports = {
             dateAssigned: row.dateAssigned,
             processStatus: row.processStatus,
           },
-          releasing: {},
+          releasing: {
+            releasingId: row.releasingId,
+            releasedDate: row.releaseDate,
+            releaseStatus: row.releaseStatus,
+            liaison: row.liaison,
+            receivedBy: row.receivedBy,
+            actualReleasedDate: row.actualReleasedDate,
+          },
         }));
 
         return res.status(StatusCodes.OK).json({
@@ -80,9 +89,12 @@ module.exports = {
         });
       }
 
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ status: "ERROR", result: [] });
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        status: "ERROR",
+        result: [],
+        message: response.message,
+        totalRecords: 1,
+      });
     } catch (err) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -143,7 +155,7 @@ module.exports = {
       if (response.status !== "SUCCESS") {
         return res
           .status(StatusCodes.BAD_REQUEST)
-          .json({ status: "ERROR", result: [] });
+          .json({ status: "ERROR", result: [], message: response.message });
       }
       const transformResponse = response?.result.map((row) => ({
         code_id: row.code_id,
@@ -164,7 +176,14 @@ module.exports = {
           dateAssigned: row.dateAssigned,
           processStatus: row.processStatus,
         },
-        releasing: {},
+        releasing: {
+          releasingId: row.releasingId,
+          releasedDate: row.releaseDate,
+          releaseStatus: row.releaseStatus,
+          liaison: row.liaison,
+          receivedBy: row.receivedBy,
+          actualReleasedDate: row.actualReleasedDate,
+        },
       }));
 
       return res.status(StatusCodes.OK).json({
@@ -174,9 +193,7 @@ module.exports = {
       });
     } catch (error) {
       console.error(error);
-      return res
-        .status(500)
-        .json({ status: "ERROR", message: "Internal server error" });
+      return res.status(500).json({ status: "ERROR", message: error.message });
     }
   },
   getDocumentCountsPerType: async (req, res) => {
@@ -311,6 +328,42 @@ module.exports = {
         message: "",
         totalRecords: response.totalRecords,
       });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: "ERROR",
+        result: [],
+        message: error.message,
+      });
+    }
+  },
+  updateProcessDocumentStatus: async (req, res) => {
+    try {
+      const { status, processId, docId } = req.body;
+      let isValid = true;
+
+      if (status === "Approved") {
+        const insertReleaseResponse = await addReleasedDocument(docId);
+        if (insertReleaseResponse.status !== "SUCCESS") {
+          isValid = false;
+        }
+      }
+
+      if (isValid) {
+        const response = await updateProcessStatus({ status, processId });
+        if (response.status !== "SUCCESS") {
+          return res.status(StatusCodes.BAD_REQUEST).json({
+            status: "ERROR",
+            result: [],
+            message: response.message,
+          });
+        }
+
+        return res.status(StatusCodes.OK).json({
+          status: "SUCCESS",
+          result: response.result,
+          message: "",
+        });
+      }
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         status: "ERROR",
