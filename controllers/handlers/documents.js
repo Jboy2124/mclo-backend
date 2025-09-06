@@ -10,6 +10,7 @@ const {
   getDocumentsByCodeIdSearch,
   getAssignedProcessedDocumentsRepo,
   updateProcessStatus,
+  getTimelineInformationRepo,
 } = require("../../modules/repositories/documents");
 const { isNullOrEmptyOrUndefined } = require("../../utilities/functions");
 const path = require("path");
@@ -55,6 +56,7 @@ module.exports = {
       if (response.status === "SUCCESS") {
         const formatted = response?.result.map((row) => ({
           code_id: row.code_id,
+          docId: row.docId,
           description: row.description,
           attachments: row.attachments,
           receiving: {
@@ -63,6 +65,7 @@ module.exports = {
             receivedThru: row.receivedThru,
             receivedDate: row.receivedDate,
             receivedTime: row.receivedTime,
+            receivingPersonnel: row.receivingPersonnel,
             status: row.status,
           },
           processing: {
@@ -167,6 +170,7 @@ module.exports = {
           receivedThru: row.receivedThru,
           receivedDate: row.receivedDate,
           receivedTime: row.receivedTime,
+          receivingPersonnel: row.receivingPersonnel,
           status: row.status,
         },
         processing: {
@@ -349,7 +353,11 @@ module.exports = {
       }
 
       if (isValid) {
-        const response = await updateProcessStatus({ status, processId });
+        const response = await updateProcessStatus({
+          status,
+          processId,
+          docId,
+        });
         if (response.status !== "SUCCESS") {
           return res.status(StatusCodes.BAD_REQUEST).json({
             status: "ERROR",
@@ -370,6 +378,25 @@ module.exports = {
         result: [],
         message: error.message,
       });
+    }
+  },
+  getTimelineData: async (req, res) => {
+    try {
+      const { docId } = req.query;
+      const response = await getTimelineInformationRepo(docId);
+      if (response.status !== "SUCCESS") {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ status: "ERROR", result: [], message: response.message });
+      }
+
+      return res
+        .status(StatusCodes.OK)
+        .json({ status: "SUCCESS", result: response.result, message: "" });
+    } catch (error) {
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ status: "ERROR", result: [], message: error.message });
     }
   },
 };

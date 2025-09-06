@@ -1,26 +1,51 @@
 const knex = require("../../config/knexConfig");
+const { insertStatusAndDate } = require("./tracker");
 
 module.exports = {
   updateProcessByCode: async (data) => {
-    const result = await knex("tbl_processing_details")
-      .update({
-        assigned_to: data.assignedTo,
-        recommendations: data.recommendations,
-        remarks: data.remarks,
-        date_assigned: new Date(),
-        process_status: "Assigned",
-      })
-      .where("doc_id", data.docId);
+    try {
+      const result = await knex.transaction(async (trx) => {
+        // First update
+        const updateResult = await trx("tbl_processing_details")
+          .update({
+            assigned_to: data.assignedTo,
+            recommendations: data.recommendations,
+            remarks: data.remarks,
+            date_assigned: new Date(),
+            process_status: "Assigned",
+          })
+          .where("doc_id", data.docId);
 
-    return result;
+        // Then insert status + date (using trx!)
+        await insertStatusAndDate(
+          { docId: data.docId, status: "Assigned" },
+          trx
+        );
+
+        return updateResult;
+      });
+
+      return { status: "SUCCESS", result, message: "" };
+    } catch (error) {
+      return { status: "ERROR", result: [], message: error.message };
+    }
   },
   updateProcessByCodeAndStatus: async (data) => {
     try {
-      const result = await knex("tbl_processing_details")
-        .update({
-          process_status: data.status,
-        })
-        .where("process_id", data.processId);
+      const result = await knex.transaction(async (trx) => {
+        // Step 1: Update process status
+        const updateResult = await trx("tbl_processing_details")
+          .update({
+            process_status: data.status,
+          })
+          .where("process_id", data.processId);
+        await insertStatusAndDate({
+          docId: data.docId,
+          status: data.status,
+        });
+
+        return updateResult;
+      });
 
       return {
         status: "SUCCESS",

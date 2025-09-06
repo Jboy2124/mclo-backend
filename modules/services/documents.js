@@ -28,7 +28,7 @@ module.exports = {
             received_through: payload.receivedThru,
             received_date: payload.date,
             received_time: payload.time,
-            received_by: "113",
+            received_by: payload.receivedBy,
           })
           .transacting(trx);
 
@@ -65,6 +65,7 @@ module.exports = {
 
       const result = await knex
         .select({
+          docId: "docs.doc_id",
           code_id: "docs.code_id",
           description: "docs.document_description",
           attachments: "document_path",
@@ -73,6 +74,7 @@ module.exports = {
           receivedThru: "rec.received_through",
           receivedDate: "rec.received_date",
           receivedTime: "rec.received_time",
+          receivingPersonnel: "rec.received_by",
           status: "rec.status",
           assignedTo: "proc.assigned_to",
           recommendations: "proc.recommendations",
@@ -172,6 +174,7 @@ module.exports = {
           receivedThru: "rec.received_through",
           receivedDate: "rec.received_date",
           receivedTime: "rec.received_time",
+          receivingPersonnel: "rec.received_by",
           status: "rec.status",
           assignedTo: "proc.assigned_to",
           recommendations: "proc.recommendations",

@@ -39,8 +39,8 @@ app.use(cors(corsConfig));
 app.use(compression());
 
 //body-parsing
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ limit: "200mb", extended: true }));
+app.use(express.json({ limit: "200mb" }));
 
 //routes
 app.use(registration);

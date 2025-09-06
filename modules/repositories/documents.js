@@ -15,6 +15,7 @@ const {
   getAssignedProcessedDocuments,
   updateProcessByCodeAndStatus,
 } = require("../services/processing");
+const { getTimelineInformation } = require("../services/tracker");
 
 module.exports = {
   newDocuments: async (payload) => {
@@ -28,6 +29,7 @@ module.exports = {
       date,
       time,
       docType,
+      receivedBy,
     } = payload;
     try {
       const doc_id = await addNewDocuments({
@@ -46,6 +48,7 @@ module.exports = {
         receivedThru,
         date,
         time,
+        receivedBy,
       });
       if (result.status !== "SUCCESS") {
         return { status: "ERROR", result: [] };
@@ -143,10 +146,11 @@ module.exports = {
   },
   updateProcessStatus: async (data) => {
     try {
-      const { status, processId } = data;
+      const { status, processId, docId } = data;
       const response = await updateProcessByCodeAndStatus({
         status,
         processId,
+        docId,
       });
       if (response.status !== "SUCCESS") {
         return {
@@ -228,6 +232,30 @@ module.exports = {
       };
     } catch (error) {
       return { status: "ERROR", result: [], message: error.message };
+    }
+  },
+  getTimelineInformationRepo: async (docId) => {
+    try {
+      const response = await getTimelineInformation(docId);
+      if (response.status !== "SUCCESS") {
+        return {
+          status: "ERROR",
+          result: [],
+          message: response.message,
+        };
+      }
+
+      return {
+        status: "SUCCESS",
+        result: response.result,
+        message: "",
+      };
+    } catch (error) {
+      return {
+        status: "ERROR",
+        result: [],
+        message: error.message,
+      };
     }
   },
 };
