@@ -11,6 +11,8 @@ module.exports = {
         callback(new Error());
       }
     },
+    methods: ["GET", "POST", "DELETE", "PUT"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
     exposedHeaders: ["set-cookie", "Location"],
   },
