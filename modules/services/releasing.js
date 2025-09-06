@@ -23,7 +23,8 @@ module.exports = {
           docId: "doc.doc_id",
           codeId: "doc.code_id",
           description: "doc.document_description",
-          initialReleaseData: "rel.release_date",
+          initialReleaseDate: "rel.release_date",
+          attachment: "doc.document_path",
           status: "rel.status",
         })
         .leftJoin("tbl_document_details as doc", "rel.doc_id", "doc.doc_id")
@@ -66,6 +67,23 @@ module.exports = {
       }
     } catch (err) {
       return { status: "ERROR", result: [], message: err.message };
+    }
+  },
+  updateReleaseDocument: async (data) => {
+    try {
+      const result = await knex("tbl_releasing_details")
+        .update({
+          liaison: data.liaison,
+          actual_released_date: new Date(),
+          received_by: data.receivedBy,
+          remarks: data.remarks,
+          status: "Released",
+        })
+        .where("releasing_id", data.releaseId);
+
+      return { status: "SUCCESS", result: result, message: "" };
+    } catch (error) {
+      return { status: "ERROR", result: [], message: error.message };
     }
   },
 };

@@ -2,6 +2,7 @@ const { StatusCodes } = require("http-status-codes");
 const {
   getDocumentsForReleaseRepo,
   addReleasedDocument,
+  updateReleasedDocumentRepo,
 } = require("../../modules/repositories/releasing");
 const { updatePdfTitle } = require("../../utilities/utilities");
 
@@ -63,6 +64,25 @@ module.exports = {
         status: "ERROR",
         message: err.message,
       });
+    }
+  },
+  updateReleaseDocument: async (req, res) => {
+    try {
+      const data = req.body;
+      const response = await updateReleasedDocumentRepo(data);
+      if (response.status !== "SUCCESS") {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ status: "ERROR", result: [], message: response.message });
+      }
+
+      return res
+        .status(StatusCodes.OK)
+        .json({ status: "SUCCESS", result: response.result, message: "" });
+    } catch (error) {
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ status: "ERROR", result: [], message: error.message });
     }
   },
 };

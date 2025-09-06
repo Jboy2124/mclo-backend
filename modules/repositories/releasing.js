@@ -1,6 +1,7 @@
 const {
   getDocumentsForRelease,
   insertReleaseDocument,
+  updateReleaseDocument,
 } = require("../services/releasing");
 
 module.exports = {
@@ -42,6 +43,26 @@ module.exports = {
         status: "ERROR",
         message: error.message,
       };
+    }
+  },
+  updateReleasedDocumentRepo: async (data) => {
+    try {
+      const response = await updateReleaseDocument(data);
+      if (response.status !== "SUCCESS") {
+        return {
+          status: "ERROR",
+          result: [],
+          message: response.message,
+        };
+      }
+
+      return {
+        status: "SUCCESS",
+        result: response.result,
+        message: "",
+      };
+    } catch (error) {
+      return { status: "ERROR", result: [], message: error.message };
     }
   },
 };

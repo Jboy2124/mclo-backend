@@ -12,6 +12,7 @@ const {
   findDocumentsByCodeId,
   getAssignedDocumentList,
   updateProcessDocumentStatus,
+  getTimelineData,
 } = require("../controllers/handlers/documents");
 const router = express.Router();
 const upload = require("../controllers/middlewares/fileUpload");
@@ -21,6 +22,7 @@ const {
 const {
   getForReleasingDocuments,
   insertNewReleasedDocument,
+  updateReleaseDocument,
 } = require("../controllers/handlers/releasing");
 
 router.post(
@@ -84,5 +86,13 @@ router.post(
   accessTokenVerification,
   updateProcessDocumentStatus
 );
+
+router.get(
+  "/api/documents/v1/timeline",
+  accessTokenVerification,
+  getTimelineData
+);
+
+router.post("/api/documents/v1/update-release-document", updateReleaseDocument);
 
 module.exports = router;
