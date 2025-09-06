@@ -14,7 +14,7 @@ module.exports = {
     try {
       const result = await registerUser(payload);
       if (!isNullOrEmptyOrUndefined(result)) {
-        // await sendVerificationMail(payload.email, result);
+        await sendVerificationMail(payload.email, result);
         return res
           .status(StatusCodes.CREATED)
           .json({ status: "SUCCESS", result: result });
